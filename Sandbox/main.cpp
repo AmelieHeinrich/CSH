@@ -19,16 +19,19 @@ void Addition_Example()
         addBuffer1[i].value = i;
     }
 
+    // Create the compute shader
     CSH_ComputeShader* addShader = new CSH_ComputeShader(L"shaders/Add.hlsl");
 
+    // Create the buffers to use in the compute shader
     CSH_Buffer* buffer0 = new CSH_Buffer(sizeof(Addition), NUM_ELEMENTS, &addBuffer0[0]);
     CSH_Buffer* buffer1 = new CSH_Buffer(sizeof(Addition), NUM_ELEMENTS, &addBuffer1[0]);
     CSH_Buffer* outputBuffer = new CSH_Buffer(sizeof(Addition), 1024, nullptr);
-
     buffer0->BuildSRV();
     buffer1->BuildSRV();
     outputBuffer->BuildUAV();
+    //
 
+    // Run the compute shader
     addShader->Bind();
     buffer0->BindSRV(0);
     buffer1->BindSRV(1);
@@ -40,7 +43,9 @@ void Addition_Example()
     buffer1->UnbindSRV(1);
     buffer0->UnbindSRV(0);
     addShader->Unbind();
+    //
 
+    // Test if everything was computed correctly on the GPU
     Addition* result = (Addition*)outputBuffer->GetData();
     for (int i = 0; i < NUM_ELEMENTS; i++)
     {
@@ -50,18 +55,53 @@ void Addition_Example()
             break;
         }
     }
+    //
 
+    // Cleanup
     delete buffer0;
     delete buffer1;
     delete outputBuffer;
     delete addShader;
 }
 
+void ImageFilter_Example()
+{
+    // Load the input image and create the output image
+    CSH_ImageData* inputImage = new CSH_ImageData("images/forest.jpg");
+    CSH_ImageData* outputImage = new CSH_ImageData(inputImage->Width, inputImage->Height);
+
+    inputImage->BuildSRV();
+    outputImage->BuildUAV();
+
+    // Create the compute shader
+    CSH_ComputeShader* filterShader = new CSH_ComputeShader(L"shaders/ImageFilter.hlsl");
+
+    // Execute the compute shader
+    filterShader->Bind();
+    inputImage->BindSRV(0);
+    outputImage->BindUAV(0);
+
+    filterShader->Dispatch(inputImage->Width, inputImage->Height, 1);
+
+    outputImage->UnbindUAV(0);
+    inputImage->UnbindSRV(0);
+    filterShader->Unbind();
+    //
+
+    // Write the output image to a file
+    outputImage->OutputToImage("images/forest_sepia.png");
+
+    // Cleanup
+    delete inputImage;
+    delete outputImage;
+    delete filterShader;
+}
+
 int main()
 {
     CSH_Init();
 
-    Addition_Example();
+    ImageFilter_Example();
     
     CSH_Shutdown();
 }

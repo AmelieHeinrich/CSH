@@ -30,6 +30,35 @@ private:
     D3D11_MAPPED_SUBRESOURCE mMappedSubresource;
 };
 
+class CSH_ImageData
+{
+public:
+    CSH_ImageData(int width, int height);
+    CSH_ImageData(const std::string& path);
+    ~CSH_ImageData();
+
+    void BuildSRV();
+    void BuildUAV();
+
+    void BindSRV(int slot);
+    void BindUAV(int slot);
+
+    void UnbindSRV(int slot);
+    void UnbindUAV(int slot);
+
+    void OutputToImage(const std::string& path);
+
+    int Width;
+    int Height;
+    int NumChannels;
+    uint8_t* Data = nullptr;
+private:
+    ID3D11Texture2D* mTexture = nullptr;
+    ID3D11ShaderResourceView* mShaderResourceView = nullptr;
+    ID3D11UnorderedAccessView* mUnorderedAccessView = nullptr;
+    D3D11_MAPPED_SUBRESOURCE mMappedSubresource;
+};
+
 class CSH_ComputeShader
 {
 public:
