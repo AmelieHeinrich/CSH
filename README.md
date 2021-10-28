@@ -1,7 +1,7 @@
 # CSH : Compute Shader Helpers
 
 Compute Shader Helpers is a set of tools to help with
-the execution of compute shaders. It is entirely written in c-style C++.
+the execution of compute shaders. It is entirely written in C++.
 
 # Requirements
 
